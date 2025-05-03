@@ -1,0 +1,1 @@
+g++ -o test_mysql main.cpp -I/usr/include/mysql -lmysqlclient
