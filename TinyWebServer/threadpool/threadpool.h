@@ -174,9 +174,24 @@ inline void threadpool<T>::run()
             continue;
 
         if(m_actor_model == 1){
-            // Reactor 模式
-            // TODO: 实现Reactor模式
-            exit(-1);
+            if(request->m_state == 0){ // 任务为读事件
+                if(request->read_once()){
+                    request->improv = 1;
+                    connectionRAII mysqlcon(&request->mysql, m_connPool);
+                    request->process();
+                }
+                else{
+                    request->improv = 1;
+                    request->timer_flag = 1;
+                }
+            }else{
+                if(request->write()){
+                    request->improv = 1;
+                }else{
+                    request->improv = 1;
+                    request->timer_flag = 1;
+                }
+            }
 
         }else{
             // Proactor 模式
