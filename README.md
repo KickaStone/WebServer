@@ -1,7 +1,7 @@
 # Linux高性能服务器
 
 - [x] 游双版本web服务器
-- [ ] tinyWebServer
+- [x] tinyWebServer
 - [ ] c++11版本WebServer
 
 游双版本代码统计（包含第五章后的大多数代码）
