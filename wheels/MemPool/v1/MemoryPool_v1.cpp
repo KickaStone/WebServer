@@ -75,10 +75,11 @@ void MemoryPool::allocateNewBlock()
     reinterpret_cast<Slot*>(newBlock)->next = firstBlock_;
     firstBlock_ = reinterpret_cast<Slot*>(newBlock);
 
-    char* body = reinterpret_cast<char*>(newBlock) + sizeof(Slot*);
+    char* body = reinterpret_cast<char*>(newBlock) + sizeof(Slot*); // 跳过第一个slot的地址
     size_t paddingSize = padPointer(body, SlotSize_); // 计算对齐需要填充内存的大小
-    curSlot_ = reinterpret_cast<Slot*>(reinterpret_cast<size_t>(newBlock)+BlockSize_ - SlotSize_ + 1);
+    curSlot_ = reinterpret_cast<Slot*>(body + paddingSize);
 
+    lastSlot_ = reinterpret_cast<Slot*>(reinterpret_cast<size_t>(newBlock)+BlockSize_ - SlotSize_ + 1);
     freeList_ = nullptr;
 }
 

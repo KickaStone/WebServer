@@ -42,5 +42,16 @@
 2. `newElement<T>` 调用`useMemeory` 计算内存对齐后合适的槽大小`size`， 调用单例模式`getMemoryPool(size).allocate()`进行内存槽分配
 3. `allocate()`函数首先查找`freeList_`里是否有空闲块，如果有直接取出并返回，同时`freeList_`向后移动；如果没有，就使用`curSlot——`进行分配；如果`curSlot_`指向最后一块的位置，说明这个内存块没有空间了，需要申请新内存块，则使用`allocateNewBlock()`。
 
+## 两个注意点
 
+1. 分配代码最后
+`curSlot_ += SlotSize_ / sizeof(Slot);` 是因为`curSlot_`是一个`Slot`类型指针，不是int型，不能直接加真实内存大小，需要除以`sizeof(Slot)`
 
+2. 请求新内存块时`lastSlot_`的设置
+
+这里使用公式`lastSlot_ = reinterpret_cast<Slot*>(reinterpret_cast<size_t>(newBlock)+BlockSize_ - SlotSize_ + 1);`为的是能用最后一个Slot，不浪费
+
+这里不能使用`newBlock + BlockSize - sizeof(slot_type)`作为最后一个内存槽，因为有paddingSize的存在，所以最后一个槽的地址是不确定的。
+
+![](./3.png)
+这里考虑lastSlot不是真的slot，而是一个标志，表示一个地址如果大于等于lastSlot，就无法构成一个完成的Slot大小。
