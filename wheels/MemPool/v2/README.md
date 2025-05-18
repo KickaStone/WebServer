@@ -120,7 +120,44 @@ span中最后一个变量`size_t _usecount`用出多少块，既可以用来计�
 
 ## 后续优化方式
 
+目前和malloc差距还很大
+```
+================================================
+4 threads || 10 rounds || 10000 malloc : cost 59770 ms
+4 threads || 10 rounds || 10000 free : cost 46479 ms
+4 threads || 10 rounds || 10000 malloc&free : cost 106249 ms
+
+
+4 threads || 10 rounds || 10000 ConcurrentAlloc : cost 788717 ms
+4 threads || 10 rounds || 10000 ConcurrentFree : cost 3407581 ms
+4 threads || 10 rounds || 10000 ConcurrentAlloc&ConcurrentFree : cost 4196298 ms
+================================================
+```
 
 ### 使用专业性能测试工具进行测试
 
 ### 使用基数树进行优化unordered_map
+
+
+### perf 报告分析
+```
+Samples: 637  of event 'cycles:P', Event count (approx.): 172760003
+Overhead  Command    Shared Object         Symbol
+  11.56%  benchmark  [unknown]             [k] 0xffffffffb96001bd                                                             ◆
+   4.88%  benchmark  [unknown]             [k] 0xffffffffb960009c                                                             ▒
+   3.87%  benchmark  libc.so.6             [.] pthread_mutex_lock@@GLIBC_2.2.5                                                ▒
+   3.71%  benchmark  libc.so.6             [.] pthread_mutex_unlock@@GLIBC_2.2.5                                              ▒
+   3.33%  benchmark  [unknown]             [k] 0xffffffffb96001b4                                                             ▒
+   2.81%  benchmark  libc.so.6             [.] __GI___lll_lock_wait                                                           ▒
+   1.85%  benchmark  [unknown]             [k] 0xffffffffb9415f96                                                             ▒
+   1.67%  benchmark  [unknown]             [k] 0xffffffffb843505b
+```
+
+发现程序存在比较明显的锁竞争。绘制火焰图后
+![](./images/未优化.svg)
+
+可以看到`MapOpjectToSpan`存在明显性能问题，主要原因就是互斥锁的使用导致锁竞争激烈。
+
+### 基数树优化
+
+tcmalloc使用基数树替代了`unordered_map`，但是64位机不能使用单层基数树，必须使用三层，只能以后实现。

@@ -97,18 +97,18 @@ void BenchmarkConcurrentAlloc(int ntimes, size_t nworks, size_t rounds){
         t.join();
     }
 
-    printf("%zu threads || %zu rounds || %zu malloc : cost %zu ms\n", nworks, rounds, ntimes, malloc_costtime.load());
-    printf("%zu threads || %zu rounds || %zu free : cost %zu ms\n", nworks, rounds, ntimes, free_costtime.load());
-    printf("%zu threads || %zu rounds || %zu malloc&free : cost %zu ms\n", nworks, rounds, ntimes, malloc_costtime.load() + free_costtime.load());
+    printf("%zu threads || %zu rounds || %zu ConcurrentAlloc : cost %zu ms\n", nworks, rounds, ntimes, malloc_costtime.load());
+    printf("%zu threads || %zu rounds || %zu ConcurrentFree : cost %zu ms\n", nworks, rounds, ntimes, free_costtime.load());
+    printf("%zu threads || %zu rounds || %zu ConcurrentAlloc&ConcurrentFree : cost %zu ms\n", nworks, rounds, ntimes, malloc_costtime.load() + free_costtime.load());
 }
 
 int main(){
     size_t n = 10000;
     cout << "================================================" << endl;
-    BenchmarkMalloc(n, 4, 10);
+    BenchmarkMalloc(n, 4, 1);
     cout << endl << endl;
 
-    BenchmarkConcurrentAlloc(n, 4, 10);
+    BenchmarkConcurrentAlloc(n, 4, 1);
 
     cout << "================================================" << endl;
     return 0;
